@@ -10,14 +10,18 @@ State::State(const int arr[])
     }
 }
 
-State::State(const State &state){
+/*State::State(const State &state){
     for (size_t i = 0; i < BOARD_SIZE; i++){
         config[i] = state.GetItem(i);
     }
-    //parent is not copied
+
+}*/
+
+void State::SetParent(std::shared_ptr<const State> par){
+    parent = par;
 }
 
-std::shared_ptr<State> State::GetParent() const{
+std::shared_ptr<const State> State::GetParent() const{
     return parent;
 }
 
@@ -47,6 +51,7 @@ void State::GetSuccessors(std::vector<std::shared_ptr<State> > &successors) cons
         int arr[BOARD_SIZE];
         CopyAndSwapItems(arr, zeroPozition, zeroPozition - 4);
         successors.push_back(std::make_shared<State>(arr));
+
     }
     //move down
     if (zeroPozition < 12){
@@ -65,6 +70,10 @@ void State::GetSuccessors(std::vector<std::shared_ptr<State> > &successors) cons
         int arr[BOARD_SIZE];
         CopyAndSwapItems(arr, zeroPozition, zeroPozition - 1);
         successors.push_back(std::make_shared<State>(arr));
+    }
+    std::shared_ptr<const State> par = std::make_shared<const State> (*this);
+    for (auto child : successors){
+        child->SetParent(par);
     }
 }
 
@@ -132,3 +141,6 @@ int State::CalculateEuristic() const{
     return ManhattanDist() + LinearConflict();
 }
 
+void BeamSearch(const size_t width){
+
+}

@@ -10,18 +10,21 @@ class State
 {
 public:
     State(const int arr[BOARD_SIZE]);
-    State(const State &state);
+   // State(const State &state);
     void Print() const;
     void GetSuccessors(std::vector<std::shared_ptr<State> > &successors) const;
     void CopyAndSwapItems(int* arr, const size_t first, const size_t second) const;
     int CalculateEuristic() const;
     //Getters
-    std::shared_ptr<State> GetParent() const;
+    std::shared_ptr<const State> GetParent() const;
     int GetItem(const size_t index) const;
+    //Setters
+    void SetParent(std::shared_ptr<const State> par);
 private:
     int ManhattanDist() const;
     int LinearConflict() const;
-    std::shared_ptr<State> parent;
+    std::shared_ptr<const State> parent;
     int config[BOARD_SIZE];
 };
 
+void BeamSearch(const size_t width);
