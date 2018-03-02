@@ -28,7 +28,7 @@ std::shared_ptr<const State> State::GetParent() const{
 void State::Print() const{
     for (size_t i = 0; i < BOARD_SIZE; i++){
         std::cout << config[i] << '\t';
-        if (i % 4 == 3)
+        if (i % BOARD_SIDE == 3)
             std::cout << std::endl;
     }
 }
@@ -49,24 +49,24 @@ void State::GetSuccessors(std::vector<std::shared_ptr<State> > &successors) cons
     //move up
     if (zeroPozition > 3){
         int arr[BOARD_SIZE];
-        CopyAndSwapItems(arr, zeroPozition, zeroPozition - 4);
+        CopyAndSwapItems(arr, zeroPozition, zeroPozition - BOARD_SIDE);
         successors.push_back(std::make_shared<State>(arr));
 
     }
     //move down
     if (zeroPozition < 12){
         int arr[BOARD_SIZE];
-        CopyAndSwapItems(arr, zeroPozition, zeroPozition + 4);
+        CopyAndSwapItems(arr, zeroPozition, zeroPozition + BOARD_SIDE);
         successors.push_back(std::make_shared<State>(arr));
     }
     //move right
-    if (zeroPozition % 4 != 3){
+    if (zeroPozition % BOARD_SIDE != 3){
         int arr[BOARD_SIZE];
         CopyAndSwapItems(arr, zeroPozition, zeroPozition + 1);
         successors.push_back(std::make_shared<State>(arr));
     }
     //move left
-    if (zeroPozition % 4 != 0){
+    if (zeroPozition % BOARD_SIDE != 0){
         int arr[BOARD_SIZE];
         CopyAndSwapItems(arr, zeroPozition, zeroPozition - 1);
         successors.push_back(std::make_shared<State>(arr));
@@ -92,12 +92,12 @@ int State::ManhattanDist() const{
     int dist = 0;
     for (int i = 0; i < BOARD_SIZE; i++){
         if (config[i] == 0){
-            dist += 6 - i / 4 - i % 4;
+            dist += 6 - i / BOARD_SIDE - i % BOARD_SIDE;
         }
         else if (config[i] != i - 1){
-            int line = (config[i] - 1) / 4;
-            int row = (config[i] - 1) % 4;
-            dist += abs(line - i / 4) + abs(row - i % 4);
+            int line = (config[i] - 1) / BOARD_SIDE;
+            int row = (config[i] - 1) % BOARD_SIDE;
+            dist += abs(line - i / BOARD_SIDE) + abs(row - i % BOARD_SIDE);
         }
     }
     return dist;
@@ -106,28 +106,28 @@ int State::ManhattanDist() const{
 int State::LinearConflict() const{
     int dist = 0;
     for (int i = 0; i < BOARD_SIZE; i++){
-        for (int j = 1; j + i % 4 < 4; j++){
+        for (int j = 1; j + i % BOARD_SIDE < BOARD_SIDE; j++){
             bool zero = false;
             if (config[i] == 0 || config [i + j] == 0 ){
                 zero = true;
             }
-            if ( ((config[i] - 1) / 4 == i / 4 ) &&
-                 ((config[i + j] - 1) / 4 == (i + j) / 4) &&
-                 (i / 4 == (i + j) / 4) &&
+            if ( ((config[i] - 1) / BOARD_SIDE == i / BOARD_SIDE ) &&
+                 ((config[i + j] - 1) / BOARD_SIDE == (i + j) / BOARD_SIDE) &&
+                 (i / BOARD_SIDE == (i + j) / BOARD_SIDE) &&
                  config[i] > config[i + j] &&
                  !zero){
                 dist += 2;
             }
         }
-        for (int j = 1; i / 4 + j < 4; j++){
+        for (int j = 1; i / BOARD_SIDE + j < BOARD_SIDE; j++){
             bool zero = false;
-            if (config[i] == 0 || config[i + 4 * j] == 0){
+            if (config[i] == 0 || config[i + BOARD_SIDE * j] == 0){
                 zero = true;
             }
-            if ( ((config[i] - 1) % 4 == i % 4) &&
-                 ((config[i + 4 * j] - 1) % 4 == (i + 4 * j) % 4) &&
-                 (i % 4 == (i + 4 * j) % 4) &&
-                 (config[i] > config[i + 4 * j]) &&
+            if ( ((config[i] - 1) % BOARD_SIDE == i % BOARD_SIDE) &&
+                 ((config[i + BOARD_SIDE * j] - 1) % BOARD_SIDE == (i + BOARD_SIDE * j) % BOARD_SIDE) &&
+                 (i % BOARD_SIDE == (i + BOARD_SIDE * j) % BOARD_SIDE) &&
+                 (config[i] > config[i + BOARD_SIDE * j]) &&
                  !zero){
                 dist += 2;
             }
