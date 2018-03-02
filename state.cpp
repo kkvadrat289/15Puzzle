@@ -81,8 +81,11 @@ void State::CopyAndSwapItems(int* arr,const size_t first, const size_t second) c
 
 int State::ManhattanDist() const{
     int dist = 0;
-    for (size_t i = 0; i < BOARD_SIZE; i++){
-        if (config[i] != i - 1){
+    for (int i = 0; i < BOARD_SIZE; i++){
+        if (config[i] == 0){
+            dist += 6 - i / 4 - i % 4;
+        }
+        else if (config[i] != i - 1){
             int line = (config[i] - 1) / 4;
             int row = (config[i] - 1) % 4;
             dist += abs(line - i / 4) + abs(row - i % 4);
@@ -91,4 +94,41 @@ int State::ManhattanDist() const{
     return dist;
 }
 
+int State::LinearConflict() const{
+    int dist = 0;
+    for (int i = 0; i < BOARD_SIZE; i++){
+        for (int j = 1; j + i % 4 < 4; j++){
+            bool zero = false;
+            if (config[i] == 0 || config [i + j] == 0 ){
+                zero = true;
+            }
+            if ( ((config[i] - 1) / 4 == i / 4 ) &&
+                 ((config[i + j] - 1) / 4 == (i + j) / 4) &&
+                 (i / 4 == (i + j) / 4) &&
+                 config[i] > config[i + j] &&
+                 !zero){
+                dist += 2;
+            }
+        }
+        for (int j = 1; i / 4 + j < 4; j++){
+            bool zero = false;
+            if (config[i] == 0 || config[i + 4 * j] == 0){
+                zero = true;
+            }
+            if ( ((config[i] - 1) % 4 == i % 4) &&
+                 ((config[i + 4 * j] - 1) % 4 == (i + 4 * j) % 4) &&
+                 (i % 4 == (i + 4 * j) % 4) &&
+                 (config[i] > config[i + 4 * j]) &&
+                 !zero){
+                dist += 2;
+            }
+        }
+    }
+    return dist;
+}
+
+int State::CalculateEuristic() const{
+    std::cout << ManhattanDist() << " + " << LinearConflict() << std::endl;
+    return ManhattanDist() + LinearConflict();
+}
 

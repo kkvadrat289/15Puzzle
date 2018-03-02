@@ -4,7 +4,7 @@
 
 #define BOARD_SIZE 16
 
-int terminal[BOARD_SIZE] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0};
+//const int terminal[BOARD_SIZE] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0};
 
 class State
 {
@@ -20,6 +20,7 @@ public:
     int GetItem(const size_t index) const;
 private:
     int ManhattanDist() const;
+    int LinearConflict() const;
     std::shared_ptr<State> parent;
     int config[BOARD_SIZE];
 };
