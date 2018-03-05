@@ -9,7 +9,7 @@ class BeamSearch
 {
 public:
     BeamSearch(const State &initial, const size_t width);
-    int FindPath();
+    std::vector<std::shared_ptr<const State> > FindPath();
     int GetNumOfOpenedStates() const;
 private:
     void findPossibleFront(std::vector<std::shared_ptr<const State> > &possible) const;

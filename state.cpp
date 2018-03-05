@@ -95,6 +95,15 @@ bool State::Equals(const int *arr) const{
     return true;
 }
 
+bool State::Equals(std::shared_ptr<State> &other) const{
+    for (int i = 0; i < BOARD_SIZE; ++i){
+        if (config[i] != other->GetItem(i)){
+            return false;
+        }
+    }
+    return true;
+}
+
 
 void State::CopyAndSwapItems(int* arr,const size_t first, const size_t second) const{
 
@@ -212,4 +221,13 @@ int State::CornerConflict() const{
     return dist;
 }
 
+void State::SetDistance(int dist){
+    distance = dist;
 }
+
+int State::GetDistance() const{
+    return distance;
+}
+
+}
+

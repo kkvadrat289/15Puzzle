@@ -1,6 +1,6 @@
 #include "beamsearch.h"
 
-#define MAX_STEPS 81
+#define MAX_STEPS 300
 
 namespace Puzzle15 {
 
@@ -8,32 +8,38 @@ BeamSearch::BeamSearch(const State &initial, const size_t w): width(w), numOfOpe
     frontStates.push_back(std::make_shared<const State> (initial));
 }
 
-int BeamSearch::FindPath(){
+std::vector<std::shared_ptr<const State> > BeamSearch::FindPath(){
+    std::vector<std::shared_ptr<const State> > path;
     if (!frontStates.back()->IsSolvable()){
         std::cout << "Not solvable" << std::endl;
-        return -1;
+        return path;
     }
     int steps = 0;
     while (frontStates.size() > 0 && steps < MAX_STEPS){
         ++steps;
+        std::vector<int> eur;
+        for (auto frontState: frontStates){
+            eur.push_back(frontState->CalculateEuristic() + frontState->GetDistance());
+        }
+
         for (auto frontState : frontStates){
             ++numOfOpenedStates;
             if (frontState->IsTerminal()){
                 std::shared_ptr<const State> current = frontState;
-                std::vector<std::shared_ptr<const State> > path;
+
                 path.push_back(current);
                 while (current->GetParent() != nullptr){
                     current = current->GetParent();
                     path.push_back(current);
                 }
-                for (size_t i = path.size() - 1; i > 0; i--){
+                /*for (size_t i = path.size() - 1; i > 0; i--){
                     std::cout << path[i]->CalculateEuristic() << std::endl;
                     path[i]->Print();
                     std::cout << std::endl;
-                }
-                std::cout << path.begin()->get()->CalculateEuristic()<<std::endl;
-                path.begin()->get()->Print();
-                return steps;
+                }*/
+                //std::cout << path.begin()->get()->CalculateEuristic()<<std::endl;
+                //path.begin()->get()->Print();
+                return path;
             }
         }
         std::vector<std::shared_ptr<const State> > possibleFront;
@@ -44,7 +50,7 @@ int BeamSearch::FindPath(){
         }
 
     }
-    return -1;
+    return path;
 }
 
 void BeamSearch::findPossibleFront(std::vector<std::shared_ptr<const State> > &possible) const{

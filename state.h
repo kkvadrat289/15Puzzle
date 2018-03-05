@@ -23,12 +23,17 @@ public:
     int CalculateEuristic() const;
     bool IsTerminal() const;
     bool IsSolvable() const;
-    //Getters
+    bool Equals(const int* arr) const;
+    bool Equals(std::shared_ptr<State> &other) const;
+    void PrintPath() const;    //Getters
+
+    int GetDistance() const;
     std::shared_ptr<const State> GetParent() const;
     int GetItem(const size_t index) const;
     //Setters
     void SetParent(std::shared_ptr<const State> par);
-    bool Equals(const int* arr) const;
+    void SetDistance(int dist);
+
 private:
     int ManhattanDist() const;
     int LinearConflict() const;
