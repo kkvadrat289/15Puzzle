@@ -1,28 +1,42 @@
 #include <iostream>
 #include "state.h"
+#include "beamsearch.h"
 
-using namespace std;
+#define WIDTH 1000
+
+using namespace Puzzle15;
+void Process(const std::vector<int> &vec){
+    std::cout<< std::endl;
+    State st(vec);
+    BeamSearch s(st, WIDTH);
+    int steps = s.FindPath();
+    std::cout << "Steps: " << steps <<std::endl;
+    std::cout << "Opened states: " << s.GetNumOfOpenedStates() <<std::endl;
+}
 
 int main()
 {
-    int arr[BOARD_SIZE] = {1,2,3,8,5,6,7,4,9,10,11,12,13,15,14,0};
-    State state(arr);
-    std::cout<<state.CalculateEuristic()<<std::endl;
-    state.Print();
-    std::vector<std::shared_ptr<State> > succ;
-    std::vector<std::shared_ptr<State> > succ2;
-    state.GetSuccessors(succ);
-    for (auto s : succ){
-        std::cout << std::endl;
-        std::cout << s->CalculateEuristic()<<std::endl;
-        s->Print();
 
-        s->GetSuccessors(succ2);
-        for (auto s2 : succ2){
-            std::cout << s2->CalculateEuristic()<<std::endl;
-            s2->Print();
+
+
+    int a;
+    while (std::cin >> a){
+        auto rng = std::default_random_engine {};
+        std::vector<int> vec(16);
+        std::iota(vec.begin(), vec.end(), 0);
+        for (int i = 0; i < a; ++i){
+            std::shuffle(std::begin(vec), std::end(vec), rng);
         }
-
-    }
+        Process(vec);
+   }
+/*
+    int arr[BOARD_SIZE] = {1,2,3,4,5,6,7,8,9,15,0,11,13,10,14,12};
+    State st(arr, 0);
+    std::cout << st.IsSolvable() <<std::endl;
+    BeamSearch s(st, WIDTH);
+    int steps = s.FindPath();
+    std::cout << "Steps: " << steps <<std::endl;
+    std::cout << "Opened states: " << s.GetNumOfOpenedStates() <<std::endl;
+*/
     return 0;
 }

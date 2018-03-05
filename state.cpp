@@ -3,19 +3,20 @@
 #include <assert.h>
 #include <cmath>
 
-State::State(const int arr[])
+namespace Puzzle15 {
+
+State::State(const int arr[], int dist) : distance(dist)
 {
     for (size_t i = 0; i < BOARD_SIZE; i++){
         config[i] = arr[i];
     }
 }
 
-/*State::State(const State &state){
-    for (size_t i = 0; i < BOARD_SIZE; i++){
-        config[i] = state.GetItem(i);
+State::State(const std::vector<int> &vec, int dist) : distance(dist){
+    for (size_t i = 0; i < BOARD_SIZE; ++i){
+        config[i] = vec[i];
     }
-
-}*/
+}
 
 void State::SetParent(std::shared_ptr<const State> par){
     parent = par;
@@ -28,7 +29,7 @@ std::shared_ptr<const State> State::GetParent() const{
 void State::Print() const{
     for (size_t i = 0; i < BOARD_SIZE; i++){
         std::cout << config[i] << '\t';
-        if (i % BOARD_SIDE == 3)
+        if (i % SIDE == 3)
             std::cout << std::endl;
     }
 }
@@ -49,32 +50,49 @@ void State::GetSuccessors(std::vector<std::shared_ptr<State> > &successors) cons
     //move up
     if (zeroPozition > 3){
         int arr[BOARD_SIZE];
-        CopyAndSwapItems(arr, zeroPozition, zeroPozition - BOARD_SIDE);
-        successors.push_back(std::make_shared<State>(arr));
+        CopyAndSwapItems(arr, zeroPozition, zeroPozition - SIDE);
+        if (parent == nullptr || (parent != nullptr && !(parent->Equals(arr))))
+            successors.push_back(std::make_shared<State>(arr, distance + 1));
 
     }
     //move down
     if (zeroPozition < 12){
         int arr[BOARD_SIZE];
-        CopyAndSwapItems(arr, zeroPozition, zeroPozition + BOARD_SIDE);
-        successors.push_back(std::make_shared<State>(arr));
+        CopyAndSwapItems(arr, zeroPozition, zeroPozition + SIDE);
+        if (parent == nullptr || (parent != nullptr && !(parent->Equals(arr))))
+            successors.push_back(std::make_shared<State>(arr, distance + 1));
+
     }
     //move right
-    if (zeroPozition % BOARD_SIDE != 3){
+    if (zeroPozition % SIDE != 3){
         int arr[BOARD_SIZE];
         CopyAndSwapItems(arr, zeroPozition, zeroPozition + 1);
-        successors.push_back(std::make_shared<State>(arr));
+        if (parent == nullptr || (parent != nullptr && !(parent->Equals(arr))))
+            successors.push_back(std::make_shared<State>(arr, distance + 1));
+
     }
     //move left
-    if (zeroPozition % BOARD_SIDE != 0){
+    if (zeroPozition % SIDE != 0){
         int arr[BOARD_SIZE];
         CopyAndSwapItems(arr, zeroPozition, zeroPozition - 1);
-        successors.push_back(std::make_shared<State>(arr));
+        if (parent == nullptr || (parent != nullptr && !(parent->Equals(arr))))
+            successors.push_back(std::make_shared<State>(arr, distance + 1));
+
     }
     std::shared_ptr<const State> par = std::make_shared<const State> (*this);
     for (auto child : successors){
         child->SetParent(par);
     }
+
+}
+
+bool State::Equals(const int *arr) const{
+    for (int i = 0; i < BOARD_SIZE; ++i){
+        if (config[i] != arr[i]){
+            return false;
+        }
+    }
+    return true;
 }
 
 
@@ -92,12 +110,12 @@ int State::ManhattanDist() const{
     int dist = 0;
     for (int i = 0; i < BOARD_SIZE; i++){
         if (config[i] == 0){
-            dist += 6 - i / BOARD_SIDE - i % BOARD_SIDE;
+            dist += 6 - i / SIDE - i % SIDE;
         }
         else if (config[i] != i - 1){
-            int line = (config[i] - 1) / BOARD_SIDE;
-            int row = (config[i] - 1) % BOARD_SIDE;
-            dist += abs(line - i / BOARD_SIDE) + abs(row - i % BOARD_SIDE);
+            int line = (config[i] - 1) / SIDE;
+            int row = (config[i] - 1) % SIDE;
+            dist += abs(line - i / SIDE) + abs(row - i % SIDE);
         }
     }
     return dist;
@@ -106,28 +124,28 @@ int State::ManhattanDist() const{
 int State::LinearConflict() const{
     int dist = 0;
     for (int i = 0; i < BOARD_SIZE; i++){
-        for (int j = 1; j + i % BOARD_SIDE < BOARD_SIDE; j++){
+        for (int j = 1; j + i % SIDE < SIDE; j++){
             bool zero = false;
             if (config[i] == 0 || config [i + j] == 0 ){
                 zero = true;
             }
-            if ( ((config[i] - 1) / BOARD_SIDE == i / BOARD_SIDE ) &&
-                 ((config[i + j] - 1) / BOARD_SIDE == (i + j) / BOARD_SIDE) &&
-                 (i / BOARD_SIDE == (i + j) / BOARD_SIDE) &&
+            if ( ((config[i] - 1) / SIDE == i / SIDE ) &&
+                 ((config[i + j] - 1) / SIDE == (i + j) / SIDE) &&
+                 (i / SIDE == (i + j) / SIDE) &&
                  config[i] > config[i + j] &&
                  !zero){
                 dist += 2;
             }
         }
-        for (int j = 1; i / BOARD_SIDE + j < BOARD_SIDE; j++){
+        for (int j = 1; i / SIDE + j < SIDE; j++){
             bool zero = false;
-            if (config[i] == 0 || config[i + BOARD_SIDE * j] == 0){
+            if (config[i] == 0 || config[i + SIDE * j] == 0){
                 zero = true;
             }
-            if ( ((config[i] - 1) % BOARD_SIDE == i % BOARD_SIDE) &&
-                 ((config[i + BOARD_SIDE * j] - 1) % BOARD_SIDE == (i + BOARD_SIDE * j) % BOARD_SIDE) &&
-                 (i % BOARD_SIDE == (i + BOARD_SIDE * j) % BOARD_SIDE) &&
-                 (config[i] > config[i + BOARD_SIDE * j]) &&
+            if ( ((config[i] - 1) % SIDE == i % SIDE) &&
+                 ((config[i + SIDE * j] - 1) % SIDE == (i + SIDE * j) % SIDE) &&
+                 (i % SIDE == (i + SIDE * j) % SIDE) &&
+                 (config[i] > config[i + SIDE * j]) &&
                  !zero){
                 dist += 2;
             }
@@ -137,10 +155,61 @@ int State::LinearConflict() const{
 }
 
 int State::CalculateEuristic() const{
-    std::cout << ManhattanDist() << " + " << LinearConflict() << std::endl;
-    return ManhattanDist() + LinearConflict();
+    //std::cout << ManhattanDist() << " + " << LinearConflict() << std::endl;
+    return ManhattanDist() + LinearConflict() + CornerConflict() + distance;
 }
 
-void BeamSearch(const size_t width){
+bool State::IsTerminal() const{
+    for (int i = 0; i < BOARD_SIZE; i++){
+        if ((i == 15 && config[i] != 0) || (i != 15 && config[i] != i + 1)){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool State::IsSolvable() const{
+    size_t zeroLine = 0;
+    int inversions = 0;
+    for (size_t i = 0; i < BOARD_SIZE; i++){
+        for (size_t j = i + 1; j < BOARD_SIZE; ++j){
+            if (config[j] < config[i]){
+                ++inversions;
+            }
+        }
+        if (config[i] == 0){
+            zeroLine = i / 4 + 1;
+        }
+    }
+    if ((zeroLine + inversions) % 2){
+        return false;
+    }
+    return true;
+}
+
+
+std::vector<int> GenerateRandomState(const int a){
+    auto rng = std::default_random_engine {};
+    std::vector<int> vec(16);
+    std::iota(vec.begin(), vec.end(), 0);
+    for (int i = 0; i < a; ++i){
+        std::shuffle(std::begin(vec), std::end(vec), rng);
+    }
+    return vec;
+}
+
+int State::CornerConflict() const{
+    int dist = 0;
+    if (config[0] != 1 && (config[1] == 2 || config[4] == 5)){
+        dist += 2;
+    }
+    if (config[3] != 4 && (config[2] == 3 || config[7] == 8)){
+        dist += 2;
+    }
+    if (config[12] != 13 && (config[8] == 9 || config[13] == 14)){
+        dist += 2;
+    }
+    return dist;
+}
 
 }

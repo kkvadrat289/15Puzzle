@@ -5,8 +5,10 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     state.cpp \
-    beamsearch.cpp
+    beamsearch.cpp \
+    astar.cpp
 
 HEADERS += \
     state.h \
-    beamsearch.h
+    beamsearch.h \
+    astar.h
